@@ -1,11 +1,12 @@
 import { Router } from "express";
 import Hunt from "../models/hunt.js";
+import checkRole from "../middleware/checkRole.js";
 import { successResponse, errorResponse, notFoundResponse } from "../utils/response.js";
 
 const router = Router();
 
 // Create a hunt
-router.post("/", async (req, res) => {
+router.post("/", checkRole("admin"), async (req, res) => {
   try {
     const { title, description, startDate, endDate, clues } = req.body;
     const hunt = new Hunt({ title, description, startDate, endDate, clues });

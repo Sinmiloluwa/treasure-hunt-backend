@@ -18,7 +18,7 @@ router.post("/", async (req, res) => {
 // Get all players
 router.get("/", async (req, res) => {
   try {
-    const players = await find().sort({ score: -1 });
+    const players = await Player.find().sort({ score: -1 });
     res.json(players);
   } catch (err) {
     res.status(500).json({ error: err.message });

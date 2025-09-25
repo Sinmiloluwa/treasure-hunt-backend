@@ -8,6 +8,7 @@ dotenv.config();
 import clueRoutes from "./routes/clueRoutes.js";
 import playerRoutes from "./routes/playerRoutes.js";
 import huntRoutes from "./routes/huntRoutes.js";
+import authRoutes from "./routes/authRoutes.js"
 
 const app = express();
 app.use(cors());
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use("/api/clues", clueRoutes);
 app.use("/api/players", playerRoutes);
 app.use("/api/hunts", huntRoutes);
+app.use("/api/auth", authRoutes)
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/treasurehunt";
