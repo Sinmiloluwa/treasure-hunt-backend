@@ -74,6 +74,16 @@ router.get("/", async (req, res) => {
           filter.startDate = { $lte: now };
           filter.endDate = { $gte: now };
         }
+
+        if (req.query.upcoming === "true") {
+          const now = new Date();
+          filter.startDate = { $gte: now };
+        }
+
+        if (req.query.past === "true") {
+          const now = new Date();
+          filter.startDate = { $lt: now };
+        }
         const hunts = await Hunt.find(filter).populate("clues");
     return successResponse(res, hunts, "Hunts retrieved successfully", 200);
   } catch (err) {
