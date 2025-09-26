@@ -13,7 +13,7 @@ router.post("/", [
   body("description").notEmpty().withMessage("Description is required"),
   body("startDate").isISO8601().withMessage("Invalid start date"),
   body("endDate").isISO8601().withMessage("Invalid end date"),
-  body("clues").isArray().withMessage("Clues must be an array")
+  body("clues").optional().isArray().withMessage("Clues must be an array")
 ], authenticateJWT, checkUserIsAdmin, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -21,9 +21,35 @@ router.post("/", [
   }
   try {
     const { title, description, startDate, endDate, clues } = req.body;
-    const hunt = new Hunt({ title, description, startDate, endDate, clues });
+    const hunt = new Hunt({
+      title,
+      description,
+      startDate,
+      endDate,
+      clues: clues || []
+    });
     await hunt.save();
     return successResponse(res, hunt, "Hunt created successfully", 201);
+  } catch (err) {
+    return errorResponse(res, err.message, 500);
+  }
+});
+
+router.patch("/:id/clues", authenticateJWT, checkUserIsAdmin, async (req, res) => {
+  const { clues } = req.body;
+  if (!Array.isArray(clues)) {
+    return res.status(400).json({ message: "Clues must be an array of clue IDs." });
+  }
+  try {
+    const hunt = await Hunt.findByIdAndUpdate(
+      req.params.id,
+      { $set: { clues } },
+      { new: true }
+    ).populate("clues");
+    if (!hunt) {
+      return notFoundResponse(res, "Hunt not found");
+    }
+    return successResponse(res, hunt, "Clues attached successfully", 200);
   } catch (err) {
     return errorResponse(res, err.message, 500);
   }

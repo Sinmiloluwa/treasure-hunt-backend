@@ -5,6 +5,7 @@ import { body, validationResult } from "express-validator";
 import User from "../models/user.js";
 import { successResponse, errorResponse  } from "../utils/response.js";
 import authenticateJWT from "../middleware/isAuthenticated.js";
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
 const router = Router();
 
