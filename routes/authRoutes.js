@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { body, validationResult } from "express-validator";
 import User from "../models/user.js";
+import { successResponse, errorResponse  } from "../utils/response.js";
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
@@ -34,7 +35,6 @@ router.post(
       .matches(/^\S+$/).withMessage("Username cannot contain spaces"),
     body("password")
       .notEmpty().withMessage("Password is required")
-      .isLength({ min: 6 }).withMessage("Password must be at least 6 characters")
   ],
   (req, res) => {
     const errors = validationResult(req);
@@ -51,13 +51,12 @@ router.post(
           return res.status(401).json({ message: "Invalid credentials" });
         }
         const token = jwt.sign({ username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "1h" });
-        return res.json({ token, role: user.role });
+        return successResponse(res, { token, role: user.role });
       });
     });
   }
 );
 
-router.post("/register", async (req, res) => {
 router.post(
   "/register",
   [
@@ -89,7 +88,6 @@ router.post(
     return res.status(201).json({ message: "User registered successfully", token, role });
   }
 );
-});
 
 // Example protected route
 router.get("/profile", authenticateJWT, (req, res) => {
