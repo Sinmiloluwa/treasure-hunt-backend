@@ -58,7 +58,23 @@ router.patch("/:id/clues", authenticateJWT, checkUserIsAdmin, async (req, res) =
 // Get all hunts
 router.get("/", async (req, res) => {
   try {
-    const hunts = await Hunt.find().populate("clues");
+        const filter = {};
+        if (req.query.title) {
+          filter.title = { $regex: req.query.title, $options: "i" };
+        }
+        if (req.query.startDate) {
+          filter.startDate = { $gte: req.query.startDate };
+        }
+        if (req.query.endDate) {
+          filter.endDate = { $lte: req.query.endDate };
+        }
+        // Ongoing hunts: current date between startDate and endDate
+        if (req.query.ongoing === "true") {
+          const now = new Date();
+          filter.startDate = { $lte: now };
+          filter.endDate = { $gte: now };
+        }
+        const hunts = await Hunt.find(filter).populate("clues");
     return successResponse(res, hunts, "Hunts retrieved successfully", 200);
   } catch (err) {
     return errorResponse(res, err.message, 500);
