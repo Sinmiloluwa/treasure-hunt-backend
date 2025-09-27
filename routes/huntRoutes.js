@@ -4,6 +4,8 @@ import checkUserIsAdmin from "../middleware/checkUserIsAdmin.js";
 import { body, validationResult } from "express-validator";
 import { successResponse, errorResponse, notFoundResponse } from "../utils/response.js";
 import authenticateJWT from "../middleware/isAuthenticated.js";
+import { toDataURL } from "qrcode";
+// Generate a QR code for a hunt (scan to join)
 
 const router = Router();
 
@@ -95,9 +97,24 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const hunt = await Hunt.findById(req.params.id).populate("clues");
-    res.json(hunt);
+    return successResponse(res, hunt);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return errorResponse(res, err.message, 500);
+  }
+});
+
+router.get("/:id/qr", async (req, res) => {
+  try {
+    const hunt = await Hunt.findById(req.params.id);
+    if (!hunt) {
+      return notFoundResponse(res, "Hunt not found");
+    }
+    // The URL users will visit after scanning the QR code (customize as needed)
+    const joinUrl = `${req.protocol}://${req.get("host")}/join-hunt/${hunt._id}`;
+    const qrImage = await toDataURL(joinUrl);
+    return successResponse(res, { qrImage, joinUrl });
+  } catch (err) {
+    return errorResponse(res, err.message, 500);
   }
 });
 
