@@ -118,4 +118,20 @@ router.get("/:id/qr", async (req, res) => {
   }
 });
 
+router.post("/:id/join", authenticateJWT, [
+    body("numberOfPlayers").isInt({ min: 1 }).withMessage("Number of players must be at least 1"),
+    body("teamName").notEmpty().withMessage("Team name is required")
+], async (req, res) => {
+  try {
+    const hunt = await Hunt.findById(req.params.id);
+    if (!hunt) {
+      return notFoundResponse(res, "Hunt not found");
+    }
+    
+    return successResponse(res, { message: "Successfully joined the hunt!" });
+  } catch (err) {
+    return errorResponse(res, err.message, 500);
+  }
+});
+
 export default router;
